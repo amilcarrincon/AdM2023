@@ -38,6 +38,7 @@ caché al CPU. Respecto a M3, el set de instrucciones es más extenso y los co-p
   y operaciones de punto flotante (FPU).</h4>
 
 <h3>2. ¿Por qué se dice que el set de instrucciones Thumb permite mayor densidad de código? Explique</h3>
+  <h4>Las instrucciones de Thumb son de 16 bit y son un subconjunto de las instrucciones de 32 bit de ARM. Las instrucciones de Thumb tienen el mismo efecto sobre el procesador que las instrucciones de ARM, operan como instrucciones de 32 bit con todas sus ventajas solo que el código utilizado para una misma tarea es más pequeño, ocupa menos espacio y por lo tanto se puede codificar más en un mismo espacio de memoria.</h4>
 <h3>3. ¿Qué entiende por arquitectura load-store? ¿Qué tipo de instrucciones no posee este tipo de arquitectura?</h3>
 <h3>4. ¿Cómo es el mapa de memoria de la familia?<br></h3>
   <h4>La familia Córtex M tiene un espacio para direcciones de memoria de 4Gb, particionado en las siguientes secciones:<br>
