@@ -71,17 +71,41 @@ mensaje de error al intentar acceder a la memoria. Estas tres interrupciones no 
 - Mantener el estado del procesador o los valores de los registros cuando se utiliza interrupciones, por ejemplo, estas detienen la ejecución del programa para ejecutar otra parte del código, al hacer esto, es necesario guardar el estado de las variables o registros para que el programa siga su ejecución desde el punto en que se detuvo.<br>
 La arquitectura guarda el contenido de los registros que necesitan cambiar su valor debido al llamado de una función. Cuando la función termina, se restauran los valores de los registros utilizando la información almacenada en la pila.<br><h4>
 
-
-
-
 <h3>11. Describa la secuencia de reset del microprocesador.
+ <h4> Luego del reset y antes de ejecutar el programa, los Cortex-M leen las dos primeras palabras de la memoria. Estas dos primeras palabras son: el valor inicial del MSP y la dirección de la rutina de Reset. Luego el procesador setea el MSP y el contador del programa (PC) con estos valores. </h4> 
+   
 <h3>12. ¿Qué entiende por “core peripherals”? ¿Qué diferencia existe entre estos y el resto de los periféricos?</h3>
+ <h4>  Los periféricos internos son los que están dentro de la misma unidad del CORTEX. Se encuentran los siguientes: Nested Vectored Interrupt Controller (NVIC), System Control Block (SBC), System timer, Memory Protection Unit (MPU). Estos los brinda ARM junto con el procesador. Los demás periféricos, por ejemplo: ADCs, timers, GPIOS, etc se los agregan los fabricantes de microcontroladores.</h4>
+    
 <h3>13. ¿Cómo se implementan las prioridades de las interrupciones? Dé un ejemplo</h3>
+ <h4> Las prioridades se asignan con números ascendentes desde la prioridad más alta a la más baja. La prioridad más alta la tiene el Reset y se representa con un número negativo (-3), le sigue la NMI y la ´Hard fault´. Estas últimas no son programables, ya vienen definidas, todas las demás – puede haber hasta 256 – son programables. 
+Los diseñadores limitan la cantidad de interrupciones que un MPU pueda tener cortando la cantidad de bits, esto se hace para bajar el consumo de potencia y la complejidad del NVIC, además de reducir la velocidad. Los bits que se sacan son los menos significativos, esto es así porque favorece la portabilidad, por ejemplo, si se quiere un MPU con 8 niveles de prioridad, solo se tendra los 3 bits superiores del Byte de configuración de prioridades.  </h4>    
+    
 <h3>14. ¿Qué es el CMSIS? ¿Qué función cumple? ¿Quién lo provee? ¿Qué ventajas aporta?</h3>
+<h4>  Las siglas significan: Cortex Microcontroller Software Interface Standard. Provee bibliotecas standar y funciones para programar CORTEX-M. Hace que sea más fácil la reusabilidad de código y la portabilidad. Lo provee ARM. Ademas, provee otras ventajas:<br>
+- Es abierto, es decir cualquiera puede descargarlo y usarlo.<br>
+- De fácil aprendizaje.<br>
+- Los drivers de los dispositivos pueden utilizarse con diferentes compiladores. <br> </h4>
+    
 <h3>15. Cuando ocurre una interrupción, asumiendo que está habilitada ¿Cómo opera el microprocesador para atender a la subrutina correspondiente? Explique con un ejemplo </h3>
-<h3>17. ¿Cómo cambia la operación de stacking al utilizar la unidad de punto flotante?</h3>
-<h3>16. Explique las características avanzadas de atención a interrupciones: tail chaining y late arrival.</h3>
-<h3>17. ¿Qué es el systick? ¿Por qué puede afirmarse que su implementación favorece la portabilidad de los sistemas operativos embebidos?</h3>
+<h4> Al ocurrir una interrupción el procesador pasa por cuatro etapas: Acepta el pedido de interrupción, cumple una secuencia de entrada, ejecuta la interrupción y vuelve de la interrupción.<br>
+Primera etapa: Se aceptará si el procesador está activo, la interrupción está habilitada y si la interrupción tiene una prioridad más alta que la que pudiera estar ejecutándose.<br>
+Segunda etapa: Guarda en el stack varios registros y también la dirección a la que tiene que regresar luego de que termine de ejecutar la interrupción. Accede al vector de interrupción (Dirección) y luego a la instrucción a ejecutarse. Después actualiza varios registros del NVIC y el core.<br>
+Tercera etapa: Ejecuta la rutina de interrupción, se utilizará el MSP para operaciones con el Stack y se operará en modo privilegiado.<br>
+Cuarta etapa: En los Cortex-M el regreso desde una interrupción se realiza con una dirección especial llamada EXC_RETURN en el program counter. Luego el procesador leerá los registros guardados en la pila para continuar donde estaba antes de la interrupción.<br></h4>
+    
+<h3>16. ¿Cómo cambia la operación de stacking al utilizar la unidad de punto flotante?</h3>
+<h4>Los Cortex-M4 son los que tienen unidad de punto flotante, y por default tiene habilitado un modo de operación llamado lazy stacking, esta funcionalidad reserva un espacio de memoria para utilizar como stack donde guardara el contenido de los registros utilizados para punto flotante, S0 – S15. Entonces, si se utiliza operaciones con punto flotante el procesador guardara ahí el contenido de esos registros, de lo contrario solo quedara reservado el espacio. Este modo de funcionamiento reduce el tiempo de respuesta en el llamado a una interrupción, ya que almacena solo los registros necesarios. </h4>    
+    
+<h3>17. Explique las características avanzadas de atención a interrupciones: tail chaining y late arrival.</h3>
+<h4>Tail chaining: Cuando se está ejecutando una interrupción y se produce la interrupción de otro de igual o mayor prioridad, el procesador seguirá con la interrupción actual (en el caso de que las prioridades sean las mismas) o la suspenderá (En el caso de que la nueva interrupción tenga una prioridad mayor), y atenderá la nueva. 
+Cuando termine de ejecutar la interrupción atenderá la que quedó suspendida. Esto evita operar el stack entre la ejecución de cada interrupción, ahorra tiempo y energía. 
+Late arrival: Se llama así a una interrupción de más alta prioridad que sucede luego de una interrupción de más baja prioridad, mientras el procesador realiza el “stacking”. Cuando termine de llenar el stack atenderá la interrupción con la prioridad más alta.</h4>
+   
+    
+    
+    
+<h3>18. ¿Qué es el systick? ¿Por qué puede afirmarse que su implementación favorece la portabilidad de los sistemas operativos embebidos?</h3>
 <h3>18. ¿Qué funciones cumple la unidad de protección de memoria (MPU)?</h3>
 <h3>19. ¿Cuántas regiones pueden configurarse como máximo? ¿Qué ocurre en caso de haber solapamientos de las regiones? ¿Qué ocurre con las zonas de memoria no cubiertas por las regiones definidas?</h3>
 <h3>20. ¿Para qué se suele utilizar la excepción PendSV? ¿Cómo se relaciona su uso con el resto de las excepciones? Dé un ejemplo</h3>
