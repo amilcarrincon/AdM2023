@@ -101,15 +101,28 @@ Cuarta etapa: En los Cortex-M el regreso desde una interrupción se realiza con 
 <h4>Tail chaining: Cuando se está ejecutando una interrupción y se produce la interrupción de otro de igual o mayor prioridad, el procesador seguirá con la interrupción actual (en el caso de que las prioridades sean las mismas) o la suspenderá (En el caso de que la nueva interrupción tenga una prioridad mayor), y atenderá la nueva. 
 Cuando termine de ejecutar la interrupción atenderá la que quedó suspendida. Esto evita operar el stack entre la ejecución de cada interrupción, ahorra tiempo y energía. 
 Late arrival: Se llama así a una interrupción de más alta prioridad que sucede luego de una interrupción de más baja prioridad, mientras el procesador realiza el “stacking”. Cuando termine de llenar el stack atenderá la interrupción con la prioridad más alta.</h4>
-   
-    
-    
     
 <h3>18. ¿Qué es el systick? ¿Por qué puede afirmarse que su implementación favorece la portabilidad de los sistemas operativos embebidos?</h3>
-<h3>18. ¿Qué funciones cumple la unidad de protección de memoria (MPU)?</h3>
-<h3>19. ¿Cuántas regiones pueden configurarse como máximo? ¿Qué ocurre en caso de haber solapamientos de las regiones? ¿Qué ocurre con las zonas de memoria no cubiertas por las regiones definidas?</h3>
-<h3>20. ¿Para qué se suele utilizar la excepción PendSV? ¿Cómo se relaciona su uso con el resto de las excepciones? Dé un ejemplo</h3>
-<h3>21. ¿Para qué se suele utilizar la excepción SVC? Expliquelo dentro de un marco de un sistema operativo embebido.</h3>
+<h4>Es un timer que puede generar la interrupción “SysTick”. Es de 24 bit, decremental y puede utilizar la frecuencia del procesador o de alguna otra referencia. Este timer puede ser utilizado por sistemas operativos en tiempo real en sistemas embebidos, entonces si el sistema operativo fue hecho para un Cortex-M3/M4, el mismo podrá ser usado en otro microcontrolador que tenga el mismo procesador. Por otro lado, si no se utiliza un FreeRTOS, este timer puede ser utilizado para otros propósitos propios de los timers.</h4>    
+    
+<h3>19. ¿Qué funciones cumple la unidad de protección de memoria (MPU)?</h3>
+<h4>Es una característica opcional, no todos los Cortex la traen y sirve básicamente para proteger ciertas regiones de memoria a través de distintos modos de acceso, este puede ser privilegiado o no. Es programable y las funciones que cumple pueden ser:<br>
+- Previene que las aplicaciones corrompan los datos de la pila utilizada por otra aplicación o un sistema operativo. Es decir, reserva memoria para una pila “privada” solo para ciertas aplicaciones.<br>
+- Previene que se pueda acceder a ciertos periféricos que pueden ser sensibles al funcionamiento de un sistema.<br>
+- Define una parte de la memoria como no ejecutable, previniendo inyección de código.<br>   
+    
+<h3>20. ¿Cuántas regiones pueden configurarse como máximo? ¿Qué ocurre en caso de haber solapamientos de las regiones? ¿Qué ocurre con las zonas de memoria no cubiertas por las regiones definidas?</h3>
+<h4>En los Cortex M3 y M4 soportan hasta 8 regiones programables. En caso de que un dato quiera ser guardado en una parte de la memoria protegida compartida por dos regiones, este será guardado en la región con el número de identificación de división más alto. Si se intenta acceder a un área no definida, el acceso será bloqueado 
+y se disparara una excepción de falla. </h4>   
+   
+<h3>21. ¿Para qué se suele utilizar la excepción PendSV? ¿Cómo se relaciona su uso con el resto de las excepciones? Dé un ejemplo</h3>
+<h4> Es otro tipo de excepción y es importante para soportar operaciones con sistemas embebidos. Tiene la prioridad más baja entre todas las interrupciones, y su función es la de esperar a que se terminen de ejecutar todas las interrupciones con prioridades más altas, para que dentro de ella el sistema operativo realice el cambio de 
+contexto de una tarea. De este modo el cambio de contexto se retrasará al haber una interrupción ejecutándose antes.
+Esto es así, porque en el caso de que un sistema operativo intente realizar un cambio de contexto mientras se está ejecutando una interrupción – es decir intente ejecutar otra tarea en el modo Thread interrumpiendo la interrupción – se dará una falla de ejecución. Entonces de este modo volverá al modo Thread cuando termine la interrupción de prioridad más baja que es PendSV. </h4>
+    
+<h3>22. ¿Para qué se suele utilizar la excepción SVC? Expliquelo dentro de un marco de un sistema operativo embebido.</h3>
+<h4>Se utiliza para hacer un sistema embebido más robusto, al ser una excepción permite que las aplicaciones, corriendo en modo no privilegiado, accedan mediante el SO corriendo en modo privilegiado, a datos u otros recursos como periféricos. Además, al ejecutarse inmediatamente después de ser disparada, no agrega un tiempo desconocido hasta la ejecución del SO. También hace que el diseño de las tareas sea más fácil, porque el programador puede abstraerse del hardware utilizado ya que esto lo manejaría el SO.</h4>
+    
 <h1>ISA</h1>
 <h3>1. ¿Qué son los sufijos y para qué se los utiliza? Dé un ejemplo</h3>
 <h3>2. ¿Para qué se utiliza el sufijo ‘s’? Dé un ejemplo</h3>
