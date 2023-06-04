@@ -118,14 +118,34 @@ y se disparara una excepción de falla. </h4>
 <h3>21. ¿Para qué se suele utilizar la excepción PendSV? ¿Cómo se relaciona su uso con el resto de las excepciones? Dé un ejemplo</h3>
 <h4> Es otro tipo de excepción y es importante para soportar operaciones con sistemas embebidos. Tiene la prioridad más baja entre todas las interrupciones, y su función es la de esperar a que se terminen de ejecutar todas las interrupciones con prioridades más altas, para que dentro de ella el sistema operativo realice el cambio de 
 contexto de una tarea. De este modo el cambio de contexto se retrasará al haber una interrupción ejecutándose antes.
-Esto es así, porque en el caso de que un sistema operativo intente realizar un cambio de contexto mientras se está ejecutando una interrupción – es decir intente ejecutar otra tarea en el modo Thread interrumpiendo la interrupción – se dará una falla de ejecución. Entonces de este modo volverá al modo Thread cuando termine la interrupción de prioridad más baja que es PendSV. </h4>
+Esto es así, porque en el caso de que un sistema operativo intente realizar un cambio de contexto mientras se está ejecutando una interrupción, si se intenta ejecutar otra tarea en el modo Thread interrumpiendo la interrupción se dará una falla de ejecución. Entonces de este modo volverá al modo Thread cuando termine la interrupción de prioridad más baja que es PendSV. </h4>
     
 <h3>22. ¿Para qué se suele utilizar la excepción SVC? Expliquelo dentro de un marco de un sistema operativo embebido.</h3>
 <h4>Se utiliza para hacer un sistema embebido más robusto, al ser una excepción permite que las aplicaciones, corriendo en modo no privilegiado, accedan mediante el SO corriendo en modo privilegiado, a datos u otros recursos como periféricos. Además, al ejecutarse inmediatamente después de ser disparada, no agrega un tiempo desconocido hasta la ejecución del SO. También hace que el diseño de las tareas sea más fácil, porque el programador puede abstraerse del hardware utilizado ya que esto lo manejaría el SO.</h4>
     
 <h1>ISA</h1>
 <h3>1. ¿Qué son los sufijos y para qué se los utiliza? Dé un ejemplo</h3>
+<h4> Los sufijos se usan en instrucciones condicionales para realizar una acción dependiendo del resultado. Y luego hay otras con las que se puede actualizar los flags de una operación. Ejemplo de instrucción condicional, NE es Not Equal y EQ es Equal:<br>
+CMP R0, #0    // compara R0 con el valor 0<br>
+ITE   NE      // si no es igual a 0<br>
+ADDNE R0, #1  // le sumo 1<br>
+ADDEQ  R0, R1 // si es igual le sumo el registro R1<br></h4>   
+    
 <h3>2. ¿Para qué se utiliza el sufijo ‘s’? Dé un ejemplo</h3>
+<h4> El sufijo s actualiza el registro APSR (Application Program Status Register, such as Carry, Overflow, Zero and Negative flags).Ejemplo: <br>
+ADDS r0, 0x70 // [r0] = 0x70  Actualiza el flag si es que hubo overflow o no. <br></h4>   
+    
 <h3>3. ¿Qué utilidad tiene la implementación de instrucciones de aritmética saturada? Dé un ejemplo con operaciones con datos de 8 bits.</h3>
+<h4>Es útil cuando se hacen procesamiento de datos, por ejemplo, si al realizar una operación aritmética el resultado es más grande que el número máximo capaz de representarse según la cantidad de bits utilizada, habrá overflow, y el dato interpretado será erróneo. Explícitamente seria: Si en 8 bits tengo 0xFF y le sumo 0x01, el resultado será 
+0x00. Si utilizo la aritmética saturada el resultado será: 0xFF. Esto se interpreta como saturación.</h4>
+    
 <h3>4. Describa brevemente la interfaz entre assembler y C ¿Cómo se reciben los argumentos de las funciones? ¿Cómo se devuelve el resultado? ¿Qué registros deben guardarse en la pila antes de ser modificados?</h3>
+<h4>Los argumentos de las funciones en asembly se reciben a través de los registros R0 – R3, siendo R0 el primer argumento de la función, R1 el segundo, R2 el tercero y R3 el cuarto argumento. También pueden utilizarse los registros S0-S15 en el caso de Cortex-M4 con FPU. Si se necesita pasar más de cuatro parámetros, se utilizará la 
+pila. R0 es el registro utilizado para devolver un valor, también puede utilizarse el R1 para devolver un valor de 64 bit.<br>
+Si la función en asembly necesita utilizar más registros para realizar operaciones y guardar temporalmente los resultados, se deberá guardar en la pila el valor de dichos registros, estos son R4 – R11, R13, R14, y en el caso del Cortex-M4 con unidad de punto flotante se deben guardar los registros S16-S31. Una vez que la función 
+termina sus instrucciones y antes de volver a “C”, debe reestablecer el valor de dichos registros desde la pila.
+El caso contrario sería una función en asembler que llama a una función en “C”, esta debe guardar los registros R0-R3, R12, S0-S15 ya que la función podría cambiar sus valores. También debe guardarse el valor del registro LR o R14 si la función contiene un salto BL o BLX, ya que al ejecutarlo sobrescribirá el valor de dicho registro. <br></h4>   
+   
 <h3>5. ¿Qué es una instrucción SIMD? ¿En qué se aplican y que ventajas reporta su uso? Dé un ejemplo.</h3>
+<h4> Es una instrucción que permite realizar múltiples operaciones de datos en paralelo. Es útil cuando por ejemplo se hace el procesamiento de audio pudiendo procesar los dos canales, izquierdo y derecho, en paralelo. Es una característica que tiene el Cortex-M4, y hace que el procesamiento de datos sea más veloz, ya que el resultado de 
+una instrucción también se aplica a varias salidas al mismo tiempo. Por ejemplo, en el caso de la instrucción SADD8 {Rd,} Rn, Rm, los registros Rn y Rm contienen 4 bytes cada uno, la instrucción realiza la suma de cada byte entre Rn y Rm y pone el resultado de cada una de las 4 sumas en Rd, también de 4 bytes, estos últimos 4 bytes pueden representar distintas salidas.</h4>
