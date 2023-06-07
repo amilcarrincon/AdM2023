@@ -1,0 +1,9 @@
+ejercicios.c:13:6:zeros	24	static
+ejercicios.c:24:6:productoEscalar32	32	static
+ejercicios.c:33:6:productoEscalar16	32	static
+ejercicios.c:43:6:productoEscalar12	32	static
+ejercicios.c:60:6:filtroVentana10	40	static
+ejercicios.c:81:6:pack32to16	32	static
+ejercicios.c:118:6:downsampleM	32	static
+ejercicios.c:129:6:invertir	32	static
+ejercicios.c:151:6:corr	32	static
