@@ -23,6 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "asm_func.h"
+#include "ejercicios.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
