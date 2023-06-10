@@ -158,7 +158,116 @@ int main(void)
   /* USER CODE BEGIN 2 */
   PrivilegiosSVC ();
 
-  const uint32_t Resultado = asm_sum (5, 3);
+  HAL_UART_Transmit(&huart3, "Starting...\r\n", 14, 1000);
+
+    DWT->CYCCNT = 0;
+    const uint32_t Resultado = asm_sum (5, 3);
+    volatile uint32_t cicles = DWT->CYCCNT;
+
+    /**
+     * Testing ejercicios.
+     */
+
+    uint32_t test_array_zeros[] = {1, 2, 3};
+    zeros(test_array_zeros, 3);
+
+    uint32_t test_array_32_in[] = {0xFF, 0x1111, 0xFFFFFFFA};
+    uint32_t test_array_32_out[3] = {0};
+    productoEscalar32(test_array_32_in, test_array_32_out, 3, 3);
+
+    uint16_t test_array_16_in[] = {0xFF, 0x1000, 0xFFFA};
+    uint16_t test_array_16_out[3] = {0};
+    productoEscalar16(test_array_16_in, test_array_16_out, 3, 3);
+
+    productoEscalar12(test_array_16_in, test_array_16_out, 3, 3);
+
+    uint16_t big_array_16_in[] = {0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc};
+    uint16_t big_array_16_out[12] = {0};
+
+    filtroVentana10(big_array_16_in, big_array_16_out, 12);
+
+    int32_t signed_big_array_32_in[] = {
+  		  0xFFFFAAAA,
+  		  0xFAFA1212,
+  		  0x00112233,
+  		  0x12345678,
+    };
+
+    int16_t signed_big_array_16_out[4] = {0};
+
+    pack32to16(signed_big_array_32_in, signed_big_array_16_out, 4);
+
+    int32_t max_number = max(signed_big_array_32_in, 4);
+    if (max_number);
+
+    int32_t downsample_input[] = {
+  		  0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9, 0xa, 0xb, 0xc
+    };
+    int32_t downsample_output[8] = {0};
+
+    downsampleM(downsample_input, downsample_output, 12, 3);
+
+    invertir(big_array_16_in, 12);
+    invertir(big_array_16_in, 12);
+
+    int16_t vector_x[] = {1, 2, 3, 4};
+    int16_t vector_y[] = {-1, -2, -3, -4};
+    int32_t vector_corr[4] = {0};
+
+    DWT->CYCCNT = 0;
+    corr(vector_x, vector_y, vector_corr, 4);
+    cicles = DWT->CYCCNT;
+    sprintf(uart_buf, "Corr cicles: %u \r\n", cicles);
+    HAL_UART_Transmit(&huart3, uart_buf, strlen(uart_buf), 1000);
+
+    /**
+     * Testing basic functionality of asm_func methods
+     */
+
+    test_array_zeros[0] = 1;
+    test_array_zeros[1] = 2;
+    test_array_zeros[2] = 3;
+    asm_zeros(test_array_zeros, 3);
+
+    zeros(test_array_32_out, 3);
+    asm_productoEscalar32(test_array_32_in, test_array_32_out, 3, 3);
+
+    test_array_16_out[0] = 0;
+    test_array_16_out[1] = 0;
+    test_array_16_out[2] = 0;
+    asm_productoEscalar16(test_array_16_in, test_array_16_out, 3, 3);
+
+    asm_productoEscalar12(test_array_16_in, test_array_16_out, 3, 3);
+
+    memset(big_array_16_out, 0, sizeof big_array_16_out);
+    asm_filtroVentana10(big_array_16_in, big_array_16_out, 12);
+
+    memset(signed_big_array_16_out, 0, sizeof signed_big_array_16_out);
+    asm_pack32to16(signed_big_array_32_in, signed_big_array_16_out, 4);
+
+    max_number = 0;
+    max_number = asm_max(signed_big_array_32_in, 4);
+
+    memset(downsample_output, 0, sizeof downsample_output);
+    asm_downsampleM(downsample_input, downsample_output, 12, 3);
+
+    asm_invertir(big_array_16_in, 12);
+
+    memset(vector_corr, 0, sizeof vector_corr);
+    DWT->CYCCNT = 0;
+    asm_corr(vector_x, vector_y, vector_corr, 4);
+    cicles = DWT->CYCCNT;
+    sprintf(uart_buf, "asm_corr cicles: %u \r\n", cicles);
+    HAL_UART_Transmit(&huart3, uart_buf, strlen(uart_buf), 1000);
+
+    memset(vector_corr, 0, sizeof vector_corr);
+    int16_t vector_x_filled[] = {1, 2, 3, 4, 0};  // adjusted vector x for simd optimization
+    DWT->CYCCNT = 0;
+    asm_corr_simd(vector_x_filled, vector_y, vector_corr, 4);
+    cicles = DWT->CYCCNT;
+    sprintf(uart_buf, "asm_cirr_simd cicles: %u \r\n", cicles);
+    HAL_UART_Transmit(&huart3, uart_buf, strlen(uart_buf), 1000);
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
